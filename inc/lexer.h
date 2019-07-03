@@ -1,6 +1,8 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#define BUFF_SIZE 4096
+
 enum TOKEN
 {
     ANY,
@@ -25,13 +27,14 @@ struct lexer
 {
     int istty;
     int fd;
-    char buff[4096];
+    char buff[BUFF_SIZE];
     short len;
     short offset;
     char iseof;
 };
 
 char initLexer(struct lexer* lex, int fd);
-char* eatToken(TOKEN toktype);
+char* eatToken(struct lexer* lex, TOKEN toktype);
+//void buffin(struct lexer* lex, short toSave);
 
 #endif /* !LEXER_H */
