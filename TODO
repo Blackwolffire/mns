@@ -1,0 +1,15 @@
+    Mini Shell
+
+[ ] Lexer
+    [ ] pipe
+    [ ] script
+    [ ] interractive
+
+[ ] parser
+[ ] AST
+
+[ ] executer
+    [ ] exec
+    [ ] redirection
+[ ] $?
+

@@ -1,0 +1,13 @@
+    MiniShell
+
+DESCRIPTION :
+
+    A simplified shell.
+
+BUILD :
+
+    Use the command: make all;
+
+USAGE :
+
+    Like "bash -posix" only you can't do a lot of things.
