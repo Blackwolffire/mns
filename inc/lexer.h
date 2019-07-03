@@ -5,6 +5,7 @@
 
 enum TOKEN
 {
+    TOKEOF,
     ANY,
     WORD,
     SEMICOL,
@@ -20,7 +21,8 @@ enum TOKEN
     SIMPLE_QUOTE,
     PARENTHESE_LEFT,
     PARENTHESE_RIGHT,
-    EQUAL
+    EQUAL,
+    STRING
 };
 
 struct lexer
@@ -28,8 +30,8 @@ struct lexer
     int istty;
     int fd;
     char buff[BUFF_SIZE];
-    short len;
-    short offset;
+    ssize_t len;
+    ssize_t offset;
     char iseof;
 };
 
