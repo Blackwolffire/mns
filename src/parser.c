@@ -126,4 +126,41 @@ static char ps_pipe(struct lexer* lex, struct ast* node)
 
 static char ps_command(struct lexer* lex, struct ast* node)
 {
+    if (ps_scommand(lex, node))
+        return 1;
 }
+
+static char ps_scommand(struc lexer* lex, struct ast* node)
+{
+    char ispref = 0;
+    char isele = 0;
+    struct ast* ptr;
+
+    do
+    {
+        if (ps_pref(lex, node))
+            break;
+        ispref = 1;
+        node->sib = initnode(ANY, NULL);
+        node = node->sib;
+    }
+    while (1);
+
+    do
+    {
+        if (ps_ele(lex, node))
+            break;
+        isele = 1;
+        node->sib = initnode(ANY, NULL);
+        node = node->sib;
+    }
+    while (1);
+
+    return ispref || isele;
+}
+
+/*
+   pref
+   elem
+   redi
+ */
