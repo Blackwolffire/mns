@@ -108,11 +108,11 @@ static TOKEN eatWord(struct lexer* lex, ssize_t* i)
 
     while (predicatWord(lex->buff[offset + *i]))
     {
+        *i += 1;
         if (lex->offset + *i >= lex->len)
-            buffin(lex, *i + 1);
+            buffin(lex, *i);
         if (lex->iseof)
             return TOKEOF;
-        *i += 1;
     }
     return WORD;
 }
@@ -120,16 +120,36 @@ static TOKEN eatWord(struct lexer* lex, ssize_t* i)
 static TOKEN eatUntil(struct lexer* lex, char carac, ssize_t* i)
 {
     if (lex->offset + *i >= lex->len)
-        buffin(lex, *i + 1);
+        buffin(lex, *i);
     if (lex->iseof)
         return TOKEOF;
     while (lex->buff[offset + *i] != carac)
     {
+        *i += 1;
+        if (lex->offset + *i >= lex->len)
+            buffin(lex, *i);
+        if (lex->iseof)
+            return TOKEOF;
+    }
+    return WORD;
+}
+
+static TOKEN eatnb(struct lexer* lex, ssize_t* i)
+{
+    if (lex->offset + *i >= lex->len)
+        buffin(lex, *i + 1);
+    if (lex->iseof)
+        return TOKEOF;
+    if (lex->buff[lex->offset] < '0' || lex->buff[lexx->offset] > '9')
+        return getToken(lex, i);
+
+    while (lex->buff[lex->offset] >= '0' && lex->buff[lexx->offset] <= '9')
+    {
+        *i += 1;
         if (lex->offset + *i >= lex->len)
             buffin(lex, *i + 1);
         if (lex->iseof)
             return TOKEOF;
-        *i += 1;
     }
     return WORD;
 }
@@ -164,8 +184,8 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
                 *toktype = eatWord(lex, &i);
             return NULL;
         case ANY:
-            tokt = eatWord(lex, &i);
-            break;
+            *toktype = eatWord(lex, &i);
+            return NULL;
         case WORD:
             if (lex->buff[lex->offset] == '\"'
                 || lex->buff[lex->offset] == '\'')
@@ -303,6 +323,12 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
             else
                 return eatWord(lex, &i);
             return NULL;
+        case ASSIGN_WORD:
+            tokt = eatWord(lex, &i);
+            break;
+        case IONB:
+            tokt = eatnb(lex, &i);
+            break;
         default:
             return NULL;
     }
@@ -328,7 +354,7 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
     return tok;
 }
 
-char *eatStr(struct lexer* lex, TOKEN toktype)
+static char *eatStr(struct lexer* lex, TOKEN toktype)
 {
     char toto;
     char* str;

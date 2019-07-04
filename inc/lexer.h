@@ -24,7 +24,8 @@ enum TOKEN
     PARENTHESE_RIGHT,
     EQUAL,
     STRING,
-    ASSIGN_WORD
+    ASSIGN_WORD,
+    IONB
 };
 
 struct lexer
@@ -39,6 +40,5 @@ struct lexer
 
 char initLexer(struct lexer* lex, int fd);
 char* eatToken(struct lexer* lex, TOKEN toktype);
-//void buffin(struct lexer* lex, short toSave);
 
 #endif /* !LEXER_H */
