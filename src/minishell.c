@@ -28,8 +28,10 @@ int main(int argc, char** argv)
         fdin = getfd(argv[1]);
         isopen = 1;
     }
-    if (fdin < 0)
-        err(127, "%s: No such file or directory", argv[1]); // watch memleak
+    if (fdin < 0){
+        err(127, "%s: No such file or directory", argv[1]);
+        return 54;
+    }
     setenv("?", "0", 1);
     initLexer(&lex, fdin);
     while (!lex.iseof)
