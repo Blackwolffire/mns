@@ -144,7 +144,7 @@ static char ps_scommand(struct lexer* lex, struct ast* node)
 {
     char ispref = 0;
     char isele = 0;
-    struct ast* ptr;
+    struct ast* ptr = NULL;
 
     do
     {
@@ -168,7 +168,8 @@ static char ps_scommand(struct lexer* lex, struct ast* node)
     }
     while (1);
     destroyTree(node);
-    ptr->sib = NULL;
+    if (ptr)
+        ptr->sib = NULL;
 
     return (!(ispref || isele));
 }

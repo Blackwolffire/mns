@@ -32,9 +32,12 @@ int main(int argc, char** argv)
         err(127, "%s: No such file or directory", argv[1]); // watch memleak
     setenv("?", "0", 1);
     initLexer(&lex, fdin);
-    struct ast* tree = parse(&lex);
-    execute(tree);
-    destroyTree(tree);
+    while (!lex.iseof)
+    {
+        struct ast* tree = parse(&lex);
+        execute(tree);
+        destroyTree(tree);
+    }
     if (isopen)
         close(fdin);
 

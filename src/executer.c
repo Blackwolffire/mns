@@ -53,11 +53,14 @@ static void ex_semicol(struct ast* r)
 {
     struct ast *e = r->son;
 
-    while (e)
-    {
+    if (e && e->type == WORD)
         execute(e);
-        e = e->sib;
-    }
+    else
+        while (e)
+        {
+            execute(e);
+            e = e->sib;
+        }
 }
 
 static void ex_pipe(struct ast* r)
