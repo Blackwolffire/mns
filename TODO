@@ -1,14 +1,19 @@
     Mini Shell
 
-[ ] Lexer
-    [ ] pipe
-    [ ] script
+[X] Lexer
+    [X] pipe
+    [X] script
     [ ] interractive
 
-[ ] parser
-[ ] AST
+[X] parser
+[X] AST
 
 [ ] executer
+    [ ] builtin
+        [ ] echo
+        [ ] kill
+        [ ] exit
+        [ ] cd
     [ ] exec
     [ ] redirection
 [ ] $?

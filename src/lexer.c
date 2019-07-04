@@ -164,8 +164,18 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
                 *toktype = eatWord(lex, &i);
             return NULL;
         case ANY:
-        case WORD:
             tokt = eatWord(lex, &i);
+            break;
+        case WORD:
+            if (lex->buff[lex->offset] == '\"'
+                || lex->buff[lex->offset] == '\'')
+            {
+                ++lex->offset;
+                return eatStr(lex, (lex->buff[lex->offset - 1] == '\'') ?
+                              SIMPLE_QUOTE : QUOTE);
+            }
+            else
+                tokt = eatWord(lex, &i);
             break;
         case SEMICOL:
             if (lex->buff[lex->offset] == ';')

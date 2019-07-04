@@ -159,8 +159,59 @@ static char ps_scommand(struc lexer* lex, struct ast* node)
     return ispref || isele;
 }
 
-/*
-   pref
-   elem
-   redi
- */
+static char ps_pref(struct lexer* lex, struct ast* node)
+{
+    TOKEN tokt = ASSIGN_WORD;
+    char *tok = NULL;
+
+    tok = eatToken(lex, &tokt);
+    if (tok && tokt == ASSIGN_WORD)
+    {
+        node->tok = tok;
+        node->type = ASSIGN_WORD;
+        return 0;
+    }
+    if (ps_redi(lex, node))
+        return 1;
+    return 0;
+}
+
+static char ps_ele(struct lexer* lex, struct ast* node)
+{
+    TOKEN tokt = WORD;
+    char *tok = NULL;
+
+    tok = eatToken(lex, &tokt);
+    if (tok && tokt == WORD)
+    {
+        node->tok = tok;
+        node->type = WORD;
+        return 0;
+    }
+    if (ps_redi(lex, node))
+        return 1;
+    return 0;
+}
+
+static char ps_redi(struct lexer* lex, struct ast* node)
+{
+    char isionb = 0;
+    char* tok;
+    TOKEN tokt = IONB;
+
+    tok = eatToken(lex, &tokt);
+    if (tok && tokt == IONB)
+    {
+        isionb = 1;
+        node->son = initnode(IONB, tok);
+    }
+    tokt = ANY;
+    eatToken(lex, &tokt);
+    if (tokt != RED_LEFT && tokt != RED_RIGHT && tokt != DOUBLE_RED_RIGHT)
+        return 1;
+    eatToken(lex, &tokt)
+    tokt = WORD;
+    tok = eatToken(lex, &tokt);
+    node->son->sib = initnode(WORD, tok);
+    return 0;
+}
