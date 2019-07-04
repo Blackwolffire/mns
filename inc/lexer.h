@@ -40,6 +40,6 @@ struct lexer
 };
 
 char initLexer(struct lexer* lex, int fd);
-char* eatToken(struct lexer* lex, enum TOKEN toktype);
+char* eatToken(struct lexer* lex, enum TOKEN* toktype);
 
 #endif /* !LEXER_H */

@@ -1,10 +1,19 @@
 #include <stdlib.h>
 #include "parser.h"
 
+static char parse_list(struct lexer* lex, struct ast* node);
+static char ps_and_or(struct lexer* lex, struct ast* node);
+static char ps_pipe(struct lexer* lex, struct ast* node);
+static char ps_command(struct lexer* lex, struct ast* node);
+static char ps_scommand(struct lexer* lex, struct ast* node);
+static char ps_pref(struct lexer* lex, struct ast* node);
+static char ps_ele(struct lexer* lex, struct ast* node);
+static char ps_redi(struct lexer* lex, struct ast* node);
+
 struct ast* parse(struct lexer* lex)
 {
     struct ast* root;
-    TOKEN tokt = EOL;
+    enum TOKEN tokt = EOL;
 
     root = initnode(ANY, NULL);
     if (parse_list(lex, root))
@@ -12,7 +21,7 @@ struct ast* parse(struct lexer* lex)
         destroyTree(root);
         return NULL;
     }
-    eatToken(lex, &tokt)
+    eatToken(lex, &tokt);
     if (tokt == EOL)
         return root;
     if (lex->iseof)
@@ -23,7 +32,7 @@ struct ast* parse(struct lexer* lex)
 
 static char parse_list(struct lexer* lex, struct ast* node)
 {
-    TOKEN tokt = SEMICOL;
+    enum TOKEN tokt = SEMICOL;
     struct ast* son = initnode(ANY, NULL);
     struct ast* sib;
 
@@ -52,7 +61,7 @@ static char parse_list(struct lexer* lex, struct ast* node)
 
 static char ps_and_or(struct lexer* lex, struct ast* node)
 {
-    TOKEN tokt = AND;
+    enum TOKEN tokt = AND;
     struct ast* son = initnode(ANY, NULL);
     struct ast* dad;
 
@@ -90,7 +99,7 @@ static char ps_and_or(struct lexer* lex, struct ast* node)
 
 static char ps_pipe(struct lexer* lex, struct ast* node)
 {
-    TOKEN tokt = PIPE;
+    enum TOKEN tokt = PIPE;
     struct ast* ptr = initnode(ANY, NULL);
 
     if (ps_command(lex, ptr))
@@ -128,9 +137,10 @@ static char ps_command(struct lexer* lex, struct ast* node)
 {
     if (ps_scommand(lex, node))
         return 1;
+    return 0;
 }
 
-static char ps_scommand(struc lexer* lex, struct ast* node)
+static char ps_scommand(struct lexer* lex, struct ast* node)
 {
     char ispref = 0;
     char isele = 0;
@@ -142,6 +152,7 @@ static char ps_scommand(struc lexer* lex, struct ast* node)
             break;
         ispref = 1;
         node->sib = initnode(ANY, NULL);
+        ptr = node;
         node = node->sib;
     }
     while (1);
@@ -152,17 +163,19 @@ static char ps_scommand(struc lexer* lex, struct ast* node)
             break;
         isele = 1;
         node->sib = initnode(ANY, NULL);
+        ptr = node;
         node = node->sib;
     }
     while (1);
     destroyTree(node);
+    ptr->sib = NULL;
 
-    return ispref || isele;
+    return (!(ispref || isele));
 }
 
 static char ps_pref(struct lexer* lex, struct ast* node)
 {
-    TOKEN tokt = ASSIGN_WORD;
+    enum TOKEN tokt = ASSIGN_WORD;
     char *tok = NULL;
 
     tok = eatToken(lex, &tokt);
@@ -179,7 +192,7 @@ static char ps_pref(struct lexer* lex, struct ast* node)
 
 static char ps_ele(struct lexer* lex, struct ast* node)
 {
-    TOKEN tokt = WORD;
+    enum TOKEN tokt = WORD;
     char *tok = NULL;
 
     tok = eatToken(lex, &tokt);
@@ -198,7 +211,7 @@ static char ps_redi(struct lexer* lex, struct ast* node)
 {
     char isionb = 0;
     char* tok;
-    TOKEN tokt = IONB;
+    enum TOKEN tokt = IONB;
 
     tok = eatToken(lex, &tokt);
     if (tok && tokt == IONB)
@@ -210,9 +223,16 @@ static char ps_redi(struct lexer* lex, struct ast* node)
     eatToken(lex, &tokt);
     if (tokt != RED_LEFT && tokt != RED_RIGHT && tokt != DOUBLE_RED_RIGHT)
         return 1;
-    eatToken(lex, &tokt)
+    node->type = tokt;
+    eatToken(lex, &tokt);
     tokt = WORD;
     tok = eatToken(lex, &tokt);
-    node->son->sib = initnode(WORD, tok);
+    if (!tok || tokt != WORD)
+        return 1;
+    if (isionb)
+        node->son->sib = initnode(WORD, tok);
+    else
+        node->son = initnode(WORD, tok);
+
     return 0;
 }

@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include "lexer.h"
 
+static char* eatStr(struct lexer* lex, enum TOKEN toktype);
+
 char initLexer(struct lexer* lex, int fd)
 {
     if (!lex || fd < 0)
@@ -21,10 +23,10 @@ char initLexer(struct lexer* lex, int fd)
 static void buffin(struct lexer* lex, short toSave)
 {
     ssize_t tmp;
-    if (toSave >= lex->len || toSave < 0)
+    if (toSave > lex->len || toSave < 0)
         return;
     if (toSave)
-        memmove(lex->buff, lex->buff + len - toSave, toSave);
+        memmove(lex->buff, lex->buff + lex->len - toSave, toSave);
     lex->len = toSave;
     lex->offset = 0;
     memset(lex->buff + toSave, 0, BUFF_SIZE - toSave);
@@ -51,7 +53,7 @@ static void eatVoid(struct lexer* lex)
         ++lex->offset;
 }
 
-static void getToken(struct lexer* lex, ssize_t* i)
+static enum TOKEN getToken(struct lexer* lex, ssize_t* i)
 {
     if (*i > 2)
         return WORD;
@@ -97,7 +99,7 @@ static void getToken(struct lexer* lex, ssize_t* i)
     return WORD;
 }
 
-static TOKEN eatWord(struct lexer* lex, ssize_t* i)
+static enum TOKEN eatWord(struct lexer* lex, ssize_t* i)
 {
     if (lex->offset + *i >= lex->len)
         buffin(lex, *i + 1);
@@ -106,7 +108,7 @@ static TOKEN eatWord(struct lexer* lex, ssize_t* i)
     if (!predicatWord(lex->buff[lex->offset]))
         return getToken(lex, i);
 
-    while (predicatWord(lex->buff[offset + *i]))
+    while (predicatWord(lex->buff[lex->offset + *i]))
     {
         *i += 1;
         if (lex->offset + *i >= lex->len)
@@ -117,13 +119,13 @@ static TOKEN eatWord(struct lexer* lex, ssize_t* i)
     return WORD;
 }
 
-static TOKEN eatUntil(struct lexer* lex, char carac, ssize_t* i)
+static enum TOKEN eatUntil(struct lexer* lex, char carac, ssize_t* i)
 {
     if (lex->offset + *i >= lex->len)
         buffin(lex, *i);
     if (lex->iseof)
         return TOKEOF;
-    while (lex->buff[offset + *i] != carac)
+    while (lex->buff[lex->offset + *i] != carac)
     {
         *i += 1;
         if (lex->offset + *i >= lex->len)
@@ -134,16 +136,16 @@ static TOKEN eatUntil(struct lexer* lex, char carac, ssize_t* i)
     return WORD;
 }
 
-static TOKEN eatnb(struct lexer* lex, ssize_t* i)
+static enum TOKEN eatnb(struct lexer* lex, ssize_t* i)
 {
     if (lex->offset + *i >= lex->len)
         buffin(lex, *i + 1);
     if (lex->iseof)
         return TOKEOF;
-    if (lex->buff[lex->offset] < '0' || lex->buff[lexx->offset] > '9')
+    if (lex->buff[lex->offset] < '0' || lex->buff[lex->offset] > '9')
         return getToken(lex, i);
 
-    while (lex->buff[lex->offset] >= '0' && lex->buff[lexx->offset] <= '9')
+    while (lex->buff[lex->offset] >= '0' && lex->buff[lex->offset] <= '9')
     {
         *i += 1;
         if (lex->offset + *i >= lex->len)
@@ -154,11 +156,11 @@ static TOKEN eatnb(struct lexer* lex, ssize_t* i)
     return WORD;
 }
 
-char* eatToken(struct lexer* lex, TOKEN* toktype)
+char* eatToken(struct lexer* lex, enum TOKEN* toktype)
 {
     char* tok = NULL;
     ssize_t i = 0;
-    TOKEN tokt = ANY;
+    enum TOKEN tokt = ANY;
 
     if (!lex || lex->iseof)
         return NULL;
@@ -321,7 +323,7 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
             *toktype = EQUAL;
         }
         else
-            return eatWord(lex, &i);
+            *toktype = eatWord(lex, &i);
         return NULL;
     case ASSIGN_WORD:
         tokt = eatWord(lex, &i);
@@ -332,29 +334,21 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
     default:
         return NULL;
     }
-    if (tokt != WORD)
+    if (lex->offset + i < lex->len && lex->buff[lex->offset + i] == '=')
+        tokt = ASSIGN_WORD;
+    if (tokt != *toktype || !i)
     {
         *toktype = tokt;
-        if (tokt == *toktype)
-            lex->offset += i;
         return NULL;
-    }
-    if (!i)
-        return NULL;
-    if (lex->offset < lex->len && lex->buff[lex->offset] == '=')
-    {
-        tokt = ASSIGN_WORD;
-        ++lex->offset;
     }
     tok = calloc(i + 1, sizeof(char));
     tok = strncpy(tok, lex->buff + lex->offset, i);
     if (tokt == *toktype)
-        lex->offset += i;
-    toktype = tokt;
+        lex->offset += i + (tokt == ASSIGN_WORD);
     return tok;
 }
 
-static char *eatStr(struct lexer* lex, TOKEN toktype)
+static char* eatStr(struct lexer* lex, enum TOKEN toktype)
 {
     char toto;
     char* str;

@@ -1,20 +1,31 @@
+#define _POSIX_C_SOURCE 200112L
+
+#include <err.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include "executer.h"
+#include "builtin.h"
+#include "tools.h"
 
 static void exec_cmd(int argc, char** argv)
 {
+    char str[4] = { 0 };
     int statval;
     pid_t pid;
 
     if (isbuiltin(argc, argv))
-        return;
+      return;
     if ((pid = fork()))
     {
         wait(&statval);
         if (WIFEXITED(statval))
-            setenv("?", WEXITSTATUS(statval));
+        {
+            statval = WEXITSTATUS(statval);
+            itoa(statval, str);
+            setenv("?", str, 1);
+        }
     }
     else
     {
@@ -92,7 +103,7 @@ static void ex_assW(struct ast* r)
 {
     if (!r || !r->sib)
         return;
-    putenv(r->tok, r->sib->tok, 1);
+    setenv(r->tok, r->sib->tok, 1);
 }
 
 void execute(struct ast* r)
