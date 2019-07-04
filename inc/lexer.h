@@ -22,7 +22,8 @@ enum TOKEN
     PARENTHESE_LEFT,
     PARENTHESE_RIGHT,
     EQUAL,
-    STRING
+    STRING,
+    ASSIGN_WORD
 };
 
 struct lexer

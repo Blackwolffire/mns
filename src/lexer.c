@@ -277,7 +277,7 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
             if (lex->buff[lex->offset] == '=')
             {
                 ++lex->offset;
-                return EQUAL;
+                *toktype = EQUAL;
             }
             else
                 return eatWord(lex, &i);
@@ -294,10 +294,16 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
     }
     if (!i)
         return NULL;
+    if (lex->offset < lex->len && lex->buff[lex->offset] == '=')
+    {
+        tokt = ASSIGN_WORD;
+        ++lex->offset;
+    }
     tok = calloc(i + 1, sizeof(char));
     tok = strncpy(tok, lex->buff + lex->offset, i);
     if (tokt == *toktype)
         lex->offset += i;
+    toktype = tokt;
     return tok;
 }
 

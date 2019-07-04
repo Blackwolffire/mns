@@ -1,10 +1,13 @@
+#include <stdlib.h>
 #include "parser.h"
 
 struct AST* parse(struct lexer* lex)
 {
-    char* tok = eatToken(lex, ANY);
-    switch ()
+    struct AST* root;
+    TOKEN tokt = ANY;
+    char* tok = eatToken(lex, &tokt);
+    if (tokt == WORD)
     {
-
+        root = initnode(WORD, tok);
     }
 }
