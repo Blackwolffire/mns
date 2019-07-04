@@ -22,3 +22,14 @@ void destroyTree(struct ast* node)
         free(node->tok);
     free(node);
 }
+
+int nbbro(struct ast* n)
+{
+    int res = 0;
+    while (n)
+    {
+        ++res;
+        n = n->sib;
+    }
+    return res;
+}

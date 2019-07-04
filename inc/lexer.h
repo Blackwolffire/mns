@@ -23,7 +23,6 @@ enum TOKEN
     PARENTHESE_LEFT,
     PARENTHESE_RIGHT,
     EQUAL,
-    STRING,
     ASSIGN_WORD,
     IONB
 };

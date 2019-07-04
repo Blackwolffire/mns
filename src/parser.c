@@ -155,6 +155,7 @@ static char ps_scommand(struc lexer* lex, struct ast* node)
         node = node->sib;
     }
     while (1);
+    destroyTree(node);
 
     return ispref || isele;
 }

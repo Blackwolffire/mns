@@ -11,4 +11,8 @@ struct ast
     struct ast* son;
 };
 
+struct ast* initnode(TOKEN type, char* cmd)
+void destroyTree(struct ast* node)
+int nbbro(struct ast* n);
+
 #endif /* ! ast_H */
