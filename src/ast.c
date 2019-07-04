@@ -1,16 +1,16 @@
 #include <stdlib.h>
 #include "ast.h"
 
-struct AST* initnode(TOKEN type, char* cmd)
+struct ast* initnode(TOKEN type, char* cmd)
 {
-    struct AST* node = malloc(sizeof(struct AST));
+    struct ast* node = malloc(sizeof(struct ast));
     node->type = type;
     node->tok = cmd;
     node->sib = NULL;
     node->son = NULL;
 }
 
-void destroyTree(struct AST* node)
+void destroyTree(struct ast* node)
 {
     if (!node)
         return;

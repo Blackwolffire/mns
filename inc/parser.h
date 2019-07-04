@@ -3,6 +3,6 @@
 
 #include "ast.h"
 
-struct AST* parse(struct lexer* lex);
+struct ast* parse(struct lexer* lex);
 
 #endif /* ! PARSER_H */

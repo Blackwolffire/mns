@@ -47,8 +47,7 @@ static char predicatWord(char carac)
 
 static void eatVoid(struct lexer* lex)
 {
-    while (lex->offset < lex->len && (lex->buff[lex->offset] == ' '
-                                      || lex->buff[lex->offset] == '\n'))
+    while (lex->offset < lex->len && lex->buff[lex->offset] == ' ')
         ++lex->offset;
 }
 
@@ -60,6 +59,8 @@ static void getToken(struct lexer* lex, ssize_t* i)
         *i += 1;
     if (*i == 1)
     {
+        if (lex->buff[lex->offset] == '\n')
+            return EOL;
         if (lex->buff[lex->offset] == ';')
             return SEMICOL;
         if (lex->buff[lex->offset] == '|' && lex->buff[lex->offset + 1] != '|')
@@ -93,6 +94,7 @@ static void getToken(struct lexer* lex, ssize_t* i)
         if (!strncmp(lex->buff + lex->offset, ">>", 2))
             return DOUBLE_RED_RIGHT;
     }
+    return WORD;
 }
 
 static TOKEN eatWord(struct lexer* lex, ssize_t* i)
@@ -152,6 +154,15 @@ char* eatToken(struct lexer* lex, TOKEN* toktype)
 
     switch (*toktype)
     {
+        case EOL:
+            if (lex->buff[lex->offset] == '\n')
+            {
+                ++lex->offset;
+                *toktype = EOL;
+            }
+            else
+                *toktype = eatWord(lex, &i);
+            return NULL;
         case ANY:
         case WORD:
             tokt = eatWord(lex, &i);

@@ -6,6 +6,7 @@
 enum TOKEN
 {
     TOKEOF,
+    EOL,
     ANY,
     WORD,
     SEMICOL,

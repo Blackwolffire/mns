@@ -1,14 +1,14 @@
-#ifndef AST_H
-#define AST_H
+#ifndef ast_H
+#define ast_H
 
 #include "lexer.h"
 
-struct AST
+struct ast
 {
     TOKEN type;
     char* tok;
-    struct AST* sib;
-    struct AST* son;
+    struct ast* sib;
+    struct ast* son;
 };
 
-#endif /* ! AST_H */
+#endif /* ! ast_H */
