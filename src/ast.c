@@ -1,13 +1,14 @@
 #include <stdlib.h>
 #include "ast.h"
 
-struct ast* initnode(TOKEN type, char* cmd)
+struct ast* initnode(enum TOKEN type, char* cmd)
 {
     struct ast* node = malloc(sizeof(struct ast));
     node->type = type;
     node->tok = cmd;
     node->sib = NULL;
     node->son = NULL;
+    return node;
 }
 
 void destroyTree(struct ast* node)

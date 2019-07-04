@@ -1,8 +1,11 @@
 #include <err.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include "parser.h"
+#include "executer.h"
 
 static int getfd(char* path)
 {
@@ -21,7 +24,9 @@ int main(int argc, char** argv)
     if (fdin < 0)
         err(127, "%s: No such file or directory", argv[1]); // watch memleak
     initLexer(&lex, fdin);
-    struct AST* tree = parse(&lex);
+    struct ast* tree = parse(&lex);
+    execute(tree);
+    destroyTree(tree);
 
     return 0;
 }

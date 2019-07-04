@@ -5,14 +5,14 @@
 
 struct ast
 {
-    TOKEN type;
+    enum TOKEN type;
     char* tok;
     struct ast* sib;
     struct ast* son;
 };
 
-struct ast* initnode(TOKEN type, char* cmd)
-void destroyTree(struct ast* node)
+struct ast* initnode(enum TOKEN type, char* cmd);
+void destroyTree(struct ast* node);
 int nbbro(struct ast* n);
 
 #endif /* ! ast_H */
