@@ -135,15 +135,28 @@ static char ps_pipe(struct lexer* lex, struct ast* node)
 
 static char ps_command(struct lexer* lex, struct ast* node)
 {
-    if (ps_scommand(lex, node))
+    struct ast* dad = initnode(ANY, NULL);
+    if (ps_scommand(lex, dad))
+    {
+        destroyTree(dad);
         return 1;
+    }
+    node->son = dad;
     return 0;
 }
 
-static char ps_scommand(struct lexer* lex, struct ast* node)
+static char istokred(enum TOKEN tokt)
+{
+    return (tokt == RED_LEFT || tokt == RED_RIGHT || tokt == DOUBLE_RED_RIGHT);
+}
+
+static char ps_scommand(struct lexer* lex, struct ast* r)
 {
     char ispref = 0;
     char isele = 0;
+    struct ast* node = initnode(ANY, NULL);
+    struct ast* cpn = node;
+    struct ast* dad;
     struct ast* ptr = NULL;
 
     do
@@ -151,6 +164,14 @@ static char ps_scommand(struct lexer* lex, struct ast* node)
         if (ps_pref(lex, node))
             break;
         ispref = 1;
+        if (istokred(node->type))
+        {
+            dad = initnode(SEMICOL, NULL);
+            dad->sib = node->son;
+            node->son = dad;
+            dad->son = cpn;
+            cpn = node;
+        }
         node->sib = initnode(ANY, NULL);
         ptr = node;
         node = node->sib;
@@ -162,15 +183,26 @@ static char ps_scommand(struct lexer* lex, struct ast* node)
         if (ps_ele(lex, node))
             break;
         isele = 1;
+        if (istokred(node->type))
+        {
+            dad = initnode(SEMICOL, NULL);
+            dad->sib = node->son;
+            node->son = dad;
+            dad->son = cpn;
+            cpn = node;
+        }
         node->sib = initnode(ANY, NULL);
         ptr = node;
         node = node->sib;
     }
     while (1);
-    destroyTree(node);
     if (ptr)
+    {
+        destroyTree(node);
         ptr->sib = NULL;
+    }
 
+    r->son = cpn;
     return (!(ispref || isele));
 }
 
