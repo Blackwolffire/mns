@@ -8,13 +8,14 @@
 [X] parser
 [X] AST
 
-[ ] executer
-    [ ] builtin
-        [ ] echo
-        [ ] kill
-        [ ] exit
-        [ ] cd
-    [ ] exec
+[X] executer
+    [X] builtin
+        [X] echo
+        [X] kill
+        [X] exit
+        [X] cd
+    [X] exec
     [ ] redirection
-[ ] $?
+    [ ] pipe
+[X] $?
 

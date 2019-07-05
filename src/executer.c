@@ -31,7 +31,7 @@ static void exec_cmd(int argc, char** argv)
     else
     {
         execvp(argv[0], argv);
-        err(127, "%s: command not found\n", *argv);
+        errx(127, "%s: command not found", *argv);
     }
 }
 
@@ -81,7 +81,6 @@ static void ex_and(struct ast* r)
 {
     if (!r)
         return;
-    ////////////////// AND
     if (r->son)
         execute(r->son);
     else

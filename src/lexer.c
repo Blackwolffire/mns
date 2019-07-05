@@ -42,9 +42,9 @@ static void buffin(struct lexer* lex, short toSave)
 static char predicatWord(char carac)
 {
     return (carac != ' ' && carac != '\n' && carac != '$' && carac != '\''
-            && carac != '\"' && carac != ';' && carac != '?' && carac != '|'
-            && carac != '<' && carac != '>'  && carac != '(' && carac != ')'
-            && carac != '=');
+            && carac != '\"' && carac != ';' && carac != '?' && carac != '&'
+            && carac != '|' && carac != '<' && carac != '>'  && carac != '('
+            && carac != ')' && carac != '=');
 }
 
 static void eatVoid(struct lexer* lex)
@@ -176,15 +176,6 @@ char* eatToken(struct lexer* lex, enum TOKEN* toktype)
 
     switch (*toktype)
     {
-    case EOL:
-        if (lex->buff[lex->offset] == '\n')
-        {
-            ++lex->offset;
-            *toktype = EOL;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
     case ANY:
         *toktype = eatWord(lex, &i);
         return NULL;
@@ -199,131 +190,30 @@ char* eatToken(struct lexer* lex, enum TOKEN* toktype)
         else
             tokt = eatWord(lex, &i);
         break;
+    case EOL:
     case SEMICOL:
-        if (lex->buff[lex->offset] == ';')
-        {
+    case PIPE:
+    case RED_LEFT:
+    case RED_RIGHT:
+    case DOLLAR:
+    case QUESTION:
+    case QUOTE:
+    case SIMPLE_QUOTE:
+    case PARENTHESE_LEFT:
+    case PARENTHESE_RIGHT:
+    case EQUAL:
+        tokt = getToken(lex, &i);
+        if (*toktype == tokt)
             ++lex->offset;
-            *toktype = SEMICOL;
-        }
-        else
-            *toktype = eatWord(lex, &i);
+        *toktype = tokt;
         return NULL;
     case AND:
-        if (!strncmp(lex->buff + lex->offset, "&&", 2))
-        {
-            lex->offset += 2;
-            *toktype = AND;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
     case OR:
-        if (!strncmp(lex->buff + lex->offset, "||", 2))
-        {
-            lex->offset += 2;
-            *toktype = OR;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case PIPE:
-        if (lex->buff[lex->offset] == '|')
-        {
-            ++lex->offset;
-            *toktype = PIPE;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case RED_LEFT:
-        if (lex->buff[lex->offset] == '<')
-        {
-            ++lex->offset;
-            *toktype = RED_LEFT;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case RED_RIGHT:
-        if (lex->buff[lex->offset] == '>')
-        {
-            ++lex->offset;
-            *toktype = RED_RIGHT;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
     case DOUBLE_RED_RIGHT:
-        if (!strncmp(lex->buff + lex->offset, ">>", 2))
-        {
+        tokt = getToken(lex, &i);
+        if (*toktype == tokt)
             lex->offset += 2;
-            *toktype = DOUBLE_RED_RIGHT;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case DOLLAR:
-        if (lex->buff[lex->offset] == '$')
-        {
-            ++lex->offset;
-            *toktype = DOLLAR;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case QUESTION:
-        if (lex->buff[lex->offset] == '?')
-        {
-            ++lex->offset;
-            *toktype = QUESTION;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case QUOTE:
-        if (lex->buff[lex->offset] == '\"')
-        {
-            ++lex->offset;
-            *toktype = QUOTE;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case SIMPLE_QUOTE:
-        if (lex->buff[lex->offset] == '\'')
-        {
-            ++lex->offset;
-            *toktype = SIMPLE_QUOTE;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case PARENTHESE_LEFT:
-        if (lex->buff[lex->offset] == '(')
-        {
-            ++lex->offset;
-            *toktype = PARENTHESE_LEFT;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case PARENTHESE_RIGHT:
-        if (lex->buff[lex->offset] == ')')
-        {
-            ++lex->offset;
-            *toktype = PARENTHESE_RIGHT;
-        }
-        else
-            *toktype = eatWord(lex, &i);
-        return NULL;
-    case EQUAL:
-        if (lex->buff[lex->offset] == '=')
-        {
-            ++lex->offset;
-            *toktype = EQUAL;
-        }
-        else
-            *toktype = eatWord(lex, &i);
+        *toktype = tokt;
         return NULL;
     case ASSIGN_WORD:
         tokt = eatWord(lex, &i);
