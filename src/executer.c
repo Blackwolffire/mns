@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include "executer.h"
+#include "glob.h"
 #include "builtin.h"
 #include "tools.h"
 
@@ -111,7 +112,7 @@ static void ex_assW(struct ast* r)
 
 void execute(struct ast* r)
 {
-    if (!r)
+    if (!r || mustexit)
         return;
     switch (r->type)
     {

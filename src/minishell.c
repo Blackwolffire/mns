@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "glob.h"
 #include "parser.h"
 #include "executer.h"
 
@@ -39,6 +40,8 @@ int main(int argc, char** argv)
         struct ast* tree = parse(&lex);
         execute(tree);
         destroyTree(tree);
+        if (mustexit)
+            break;
     }
     if (isopen)
         close(fdin);
