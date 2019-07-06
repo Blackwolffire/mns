@@ -15,7 +15,7 @@
         [X] exit
         [X] cd
     [X] exec
-    [ ] redirection
-    [ ] pipe
+    [X] redirection
+    [X] pipe
 [X] $?
 

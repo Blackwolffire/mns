@@ -1,8 +1,10 @@
 #define _POSIX_C_SOURCE 200112L
 
 #include <err.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -11,7 +13,6 @@
 #include "builtin.h"
 #include "tools.h"
 
-#include <stdio.h>
 
 static void exec_cmd(int argc, char** argv)
 {
@@ -33,7 +34,6 @@ static void exec_cmd(int argc, char** argv)
     }
     else
     {
-        printf("frr %s \n !!!!!!!! \n", argv[0]);
         execvp(argv[0], argv);
         errx(127, "%s: command not found", *argv);
     }
@@ -77,14 +77,10 @@ static int getionb(struct ast* r)
 {
     if (!r || r->type != IONB)
         return 0;
-    if (r->tok[0] == '1')
-        return 1;
-    if (r->tok[0] == '2')
-        return 2;
-    return 0;
+    return strtol(r->tok, NULL, 10);
 }
 
-static void ex_redr(struct ast* r)
+static void ex_red(struct ast* r)
 {
     int savein;
     int saveout;
@@ -104,20 +100,51 @@ static void ex_redr(struct ast* r)
         case RED_RIGHT:
             if (r->son->sib->type == IONB)
             {
-                if (!(tmp = getionb(r->son->sib)))
-                {
-                    fd = open(r->son->sib->tok, O_CREAT | OWRONLY
-                                 | O_TRUNC);
-                    dup2(fdout, STDOUT_FILENO);
-                    execute(r->son->son);
-                    close(fd);
-                }
+                tmp = getionb(r->son->sib);
+                fd = open(r->son->sib->tok, O_CREAT | O_WRONLY | O_TRUNC);
+                dup2(fd, tmp);
             }
+            else
+            {
+                fd = open(r->son->sib->tok, O_CREAT | O_WRONLY | O_TRUNC);
+                dup2(fd, STDOUT_FILENO);
+            }
+            execute(r->son->son);
+            close(fd);
             break;
-        default :
+        case DOUBLE_RED_RIGHT:
+            if (r->son->sib->type == IONB)
+            {
+                tmp = getionb(r->son->sib);
+                fd = open(r->son->sib->tok, O_CREAT | O_WRONLY | O_APPEND);
+                dup2(fd, tmp);
+            }
+            else
+            {
+                fd = open(r->son->sib->tok, O_CREAT | O_WRONLY | O_APPEND);
+                dup2(fd, STDOUT_FILENO);
+            }
+            execute(r->son->son);
+            close(fd);
+            break;
+        case RED_LEFT:
+            if (r->son->sib->type == IONB)
+            {
+                tmp = getionb(r->son->sib);
+                fd = open(r->son->sib->tok, O_RDONLY);
+                dup2(fd, tmp);
+            }
+            else
+            {
+                fd = open(r->son->sib->tok, O_RDONLY);
+                dup2(fd, STDIN_FILENO);
+            }
+            execute(r->son->son);
+            close(fd);
+            break;
+        default:
             break;
         }
-
         dup2(savein, STDIN_FILENO);
         dup2(saveout, STDOUT_FILENO);
         close(savein);
@@ -125,6 +152,7 @@ static void ex_redr(struct ast* r)
     }
     else if (r->son)
     {
+        errx(134, "If you see this message my minishell sucks...");
     }
 
     execute(r->sib);
@@ -237,13 +265,9 @@ void execute(struct ast* r)
         ex_assW(r);
         break;
     case RED_RIGHT:
-        ex_redr(r);
-        break;
     case RED_LEFT:
-        ex_redl(r);
-        break;
     case DOUBLE_RED_RIGHT:
-        ex_dredr(r);
+        ex_red(r);
         break;
     default:
         return;

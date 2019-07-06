@@ -103,7 +103,10 @@ static char ps_pipe(struct lexer* lex, struct ast* node)
     struct ast* ptr = initnode(ANY, NULL);
 
     if (ps_command(lex, ptr))
+    {
+        destroyTree(ptr);
         return 1;
+    }
     node->son = ptr;
 
     eatToken(lex, &tokt);
@@ -171,6 +174,8 @@ static char ps_scommand(struct lexer* lex, struct ast* r)
             node->son = dad;
             dad->son = cpn;
             cpn = node;
+            if (ptr)
+                ptr->sib = NULL;
         }
         node->sib = initnode(ANY, NULL);
         ptr = node;
@@ -190,6 +195,8 @@ static char ps_scommand(struct lexer* lex, struct ast* r)
             node->son = dad;
             dad->son = cpn;
             cpn = node;
+            if (ptr)
+                ptr->sib = NULL;
         }
         node->sib = initnode(ANY, NULL);
         ptr = node;
